@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revio — AI Powered Contract Review for Construction</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coal: #1a1a18;
+    --steel: #2e3830;
+    --rust: #c4501a;
+    --amber: #e8a020;
+    --concrete: #d4cfc8;
+    --cream: #f5f2ed;
+    --white: #fdfcfa;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--coal);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.4rem 3rem;
+    background: var(--coal);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--rust); }
+
+  nav ul {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  nav ul a {
+    color: var(--concrete);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  nav ul a:hover { color: var(--amber); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: var(--coal);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 40px,
+      rgba(255,255,255,0.018) 40px,
+      rgba(255,255,255,0.018) 41px
+    );
+    pointer-events: none;
+  }
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5rem 4rem 5rem 5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--rust);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.7s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 7vw, 7rem);
+    line-height: 0.92;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero h1 em {
+    color: var(--amber);
+    font-style: normal;
+  }
+
+  .hero-body {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--concrete);
+    max-width: 440px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-visual::before {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(196,80,26,0.15) 0%, transparent 70%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  .stat-cluster {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5px;
+    width: 360px;
+    opacity: 0;
+    animation: fadeIn 1s 1s forwards;
+  }
+
+  .stat-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    transition: background 0.3s;
+  }
+
+  .stat-box:hover { background: rgba(255,255,255,0.07); }
+
+  .stat-box:first-child { border-radius: 4px 0 0 0; }
+  .stat-box:nth-child(2) { border-radius: 0 4px 0 0; }
+  .stat-box:nth-child(3) { border-radius: 0 0 0 4px; }
+  .stat-box:last-child { border-radius: 0 0 4px 0; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: var(--amber);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.03em;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--concrete);
+    opacity: 0.7;
+  }
+
+  /* MISSION */
+  .mission {
+    padding: 8rem 5rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 6rem;
+    align-items: start;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .section-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rust);
+    padding-top: 0.5rem;
+  }
+
+  .mission-content h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    line-height: 1.2;
+    margin-bottom: 2rem;
+    color: var(--steel);
+  }
+
+  .mission-content h2 em {
+    font-style: italic;
+    color: var(--rust);
+  }
+
+  .mission-content p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: #3d3d3a;
+    margin-bottom: 1.5rem;
+    max-width: 620px;
+  }
+
+  /* PROBLEM STRIP */
+  .problem-strip {
+    background: var(--coal);
+    padding: 6rem 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .problem-strip::after {
+    content: 'RISK';
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18rem;
+    color: rgba(255,255,255,0.03);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .problem-strip h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    color: var(--white);
+    letter-spacing: 0.03em;
+    margin-bottom: 3.5rem;
+    max-width: 700px;
+  }
+
+  .problem-strip h2 span { color: var(--amber); }
+
+  .problems-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+
+  .problem-card {
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  .problem-card:hover {
+    background: rgba(255,255,255,0.055);
+    transform: translateY(-3px);
+  }
+
+  .problem-icon {
+    font-size: 2.8rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  .problem-card h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 0.9rem;
+    letter-spacing: 0.02em;
+  }
+
+  .problem-card p {
+    font-size: 0.88rem;
+    line-height: 1.65;
+    color: var(--concrete);
+    opacity: 0.85;
+  }
+
+  /* HOW WE HELP */
+  .how {
+    padding: 8rem 5rem;
+    background: var(--cream);
+  }
+
+  .how-header {
+    text-align: center;
+    margin-bottom: 5rem;
+  }
+
+  .how-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+    color: var(--coal);
+    letter-spacing: 0.03em;
+    margin-bottom: 1.2rem;
+  }
+
+  .how-header p {
+    font-size: 1.1rem;
+    color: var(--steel);
+    opacity: 0.7;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .step {
+    position: relative;
+    padding: 2rem 0;
+  }
+
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    color: var(--rust);
+    opacity: 0.15;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .step h3 {
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--coal);
+    margin-bottom: 1rem;
+    letter-spacing: 0.01em;
+  }
+
+  .step p {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--steel);
+    opacity: 0.75;
+  }
+
+  /* VALUES */
+  .values {
+    background: var(--white);
+    padding: 8rem 5rem;
+    display: grid;
+    grid-template-columns: 1.2fr 2fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .values-text h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    color: var(--coal);
+    letter-spacing: 0.03em;
+    margin-bottom: 2rem;
+    line-height: 1;
+  }
+
+  .values-text h2 span { color: var(--rust); }
+
+  .values-text p {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--steel);
+    margin-bottom: 1.5rem;
+  }
+
+  .values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  .value-item {
+    display: flex;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .value-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--rust);
+    flex-shrink: 0;
+    margin-top: 0.5rem;
+  }
+
+  .value-item h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--coal);
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.01em;
+  }
+
+  .value-item p {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--steel);
+    opacity: 0.8;
+  }
+
+  /* CONTACT FORM */
+  .contact {
+    background: var(--cream);
+    padding: 8rem 5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .contact-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .contact-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4vw, 4rem);
+    color: var(--coal);
+    letter-spacing: 0.03em;
+    margin-bottom: 1rem;
+  }
+
+  .contact-header p {
+    font-size: 1.05rem;
+    color: var(--steel);
+    opacity: 0.7;
+  }
+
+  .contact-form {
+    background: var(--white);
+    padding: 3rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--coal);
+    margin-bottom: 0.6rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    border: 1px solid var(--concrete);
+    background: var(--cream);
+    color: var(--coal);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--rust);
+    background: var(--white);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .submit-btn {
+    background: var(--rust);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1.1rem 2.5rem;
+    border: none;
+    cursor: pointer;
+    transition: background 0.25s, transform 0.2s;
+    width: 100%;
+  }
+
+  .submit-btn:hover {
+    background: var(--coal);
+    transform: translateY(-2px);
+  }
+
+  .submit-btn:disabled {
+    background: var(--concrete);
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .form-status {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    text-align: center;
+    display: none;
+  }
+
+  .form-status.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    display: block;
+  }
+
+  .form-status.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    display: block;
+  }
+
+  /* CTA */
+  .cta {
+    background: var(--rust);
+    padding: 6rem 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    right: -200px;
+    top: -200px;
+    pointer-events: none;
+  }
+
+  .cta h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 4.5vw, 4.5rem);
+    color: var(--white);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    max-width: 600px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cta-btn {
+    flex-shrink: 0;
+    background: var(--white);
+    color: var(--rust);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1.2rem 3rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+    transition: background 0.25s, color 0.25s, transform 0.2s;
+  }
+
+  .cta-btn:hover {
+    background: var(--coal);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--coal);
+    padding: 2.5rem 5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer .logo { font-size: 1.2rem; }
+
+  footer p {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 0.05em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  /* SCROLL ANIMATION */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    nav { padding: 1.2rem 2rem; }
+    nav ul { gap: 1.5rem; }
+    nav ul a { font-size: 0.75rem; }
+    
+    .hero {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    
+    .hero-text { padding: 4rem 2rem; }
+    .hero-visual { padding: 3rem 2rem 4rem; }
+    
+    .mission, .values {
+      grid-template-columns: 1fr;
+      padding: 5rem 2rem;
+      gap: 3rem;
+    }
+    
+    .problem-strip, .how { padding: 5rem 2rem; }
+    
+    .problems-grid {
+      grid-template-columns: 1fr;
+      gap: 1px;
+    }
+    
+    .steps {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+    
+    .cta {
+      flex-direction: column;
+      gap: 3rem;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+    
+    .contact { padding: 5rem 2rem; }
+    
+    .contact-form { padding: 2rem 1.5rem; }
+    
+    .form-row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    
+    footer {
+      flex-direction: column;
+      gap: 1.5rem;
+      text-align: center;
+      padding: 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Rev<span>io</span></div>
+  <ul>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">AI Powered Contract Intelligence</div>
+    <h1>Don't Sign <em>Blind.</em></h1>
+    <p class="hero-body">Every construction contract contains hidden risks that could cost you thousands. Revio uses AI to identify problematic clauses, unfair terms, and deal breaker conditions in minutes so you can negotiate with confidence.</p>
+  </div>
+  <div class="hero-visual">
+    <div class="stat-cluster">
+      <div class="stat-box">
+        <div class="stat-num">83%</div>
+        <div class="stat-label">of disputes stem from contract ambiguity</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">90%</div>
+        <div class="stat-label">of contracts contain unfair terms</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">< 5<br>min</div>
+        <div class="stat-label">to receive a full contract review</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">available whenever a contract lands</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION -->
+<section class="mission reveal" id="about">
+  <div class="section-label">Our Mission</div>
+  <div class="mission-content">
+    <h2>Protecting the people who <em>build</em> this country.</h2>
+    <p>Every day, construction businesses — sole traders, subcontractors, specialist trades — sign contracts loaded with clauses that shift risk onto them. Unfair payment terms. Unlimited liability. Back to back conditions. Penalty heavy termination rights. Many don't know until it's too late.</p>
+    <p>Revio exists to change that. We combine AI trained on construction contract law with a deep understanding of how disputes actually unfold on site so you can sign with confidence, or push back with evidence.</p>
+    <p>We're not here to replace a solicitor. We're here to make sure you know exactly what you're agreeing to before you pick up the pen.</p>
+  </div>
+</section>
+
+<!-- PROBLEM STRIP -->
+<section class="problem-strip reveal">
+  <h2>The risks hiding in every <span>contract.</span></h2>
+  <div class="problems-grid">
+    <div class="problem-card">
+      <div class="problem-icon">⏳</div>
+      <h3>Unfair Payment Terms</h3>
+      <p>Extended payment windows, pay when paid clauses, and vague valuation processes that keep cash trapped in the supply chain affecting your ability to pay wages and suppliers on time.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">⚖️</div>
+      <h3>Unlimited Liability Exposure</h3>
+      <p>Clauses that make you responsible for losses far exceeding the value of your contract including consequential damages you'd never have foreseen when you signed.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🔗</div>
+      <h3>Back to Back Conditions</h3>
+      <p>Your obligations flow up to a main contract you've never seen. Your rights can be diluted or delayed by proceedings happening entirely above you in the chain.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🚪</div>
+      <h3>One Sided Termination Rights</h3>
+      <p>Clients can walk away for convenience with minimal notice, leaving you with unpaid work and mobilisation costs. Your exit rights are often far more constrained in return.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">📋</div>
+      <h3>Vague Variation Procedures</h3>
+      <p>Informal instruction without a written order means extras go unpaid. Without clear variation procedures, your additional work becomes the client's free upgrade.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🔒</div>
+      <h3>Dispute Resolution Gaps</h3>
+      <p>Poorly defined processes that lock you into expensive litigation rather than adjudication or mediation making it economically impossible to pursue what you're owed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW WE HELP -->
+<section class="how reveal" id="how">
+  <div class="how-header">
+    <h2>How Revio reviews your contracts</h2>
+    <p>No legal training required. Just upload your contract and let us go to work.</p>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Upload Your Contract</h3>
+      <p>Share your contract in PDF or Word format. We handle everything from JCT and NEC to bespoke client drafted agreements.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Secure Payment</h3>
+      <p>Complete your payment securely through Stripe. Only £125 for a comprehensive analysis that could save you thousands.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>AI Risk Analysis</h3>
+      <p>Our AI identifies problematic clauses, scores your commercial risk, and benchmarks terms against standard industry practice.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <h3>Receive Your Report</h3>
+      <p>Within 5 minutes, you receive a comprehensive Excel report with risk register, executive summary, and actionable recommendations.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="values reveal">
+  <div class="values-text">
+    <h2>WHY WE BUILT <span>THIS.</span></h2>
+    <p>Our founders have seen first hand what happens when construction businesses sign contracts they don't fully understand. Projects that should have been profitable become cash flow nightmares. Disputes drag on for years. Good companies fold.</p>
+    <p>We believe the solution isn't more lawyers it's better information at the right moment. That's what Revio delivers.</p>
+  </div>
+  <div class="values-list">
+    <div class="value-item">
+      <div class="value-dot"></div>
+      <div>
+        <h3>Plain language, always</h3>
+        <p>We translate legal complexity into plain English. If you can't understand the risk, you can't manage it.</p>
+      </div>
+    </div>
+    <div class="value-item">
+      <div class="value-dot"></div>
+      <div>
+        <h3>On your side, always</h3>
+        <p>We review every contract from the perspective of the contractor or subcontractor because that's who we exist to protect.</p>
+      </div>
+    </div>
+    <div class="value-item">
+      <div class="value-dot"></div>
+      <div>
+        <h3>Honest about our limits</h3>
+        <p>We're a risk identification tool, not a law firm. We'll tell you clearly when a contract is serious enough to warrant a solicitor's eye.</p>
+      </div>
+    </div>
+    <div class="value-item">
+      <div class="value-dot"></div>
+      <div>
+        <h3>Priced for everyone</h3>
+        <p>Affordable, transparent pricing because protecting yourself commercially shouldn't be a luxury only large firms can afford.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section class="contact reveal" id="contact">
+  <div class="contact-header">
+    <h2>Get in touch</h2>
+    <p>Have questions about our service? Want to discuss a complex contract? We're here to help.</p>
+  </div>
+  <form class="contact-form" id="contactForm">
+    <div class="form-row">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="company">Company</label>
+      <input type="text" id="company" name="company">
+    </div>
+    <div class="form-group">
+      <label for="message">Message *</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+    </div>
+    <button type="submit" class="submit-btn">Send Message</button>
+    <div class="form-status" id="formStatus"></div>
+  </form>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="pricing">
+  <h2>Get your first contract reviewed today.</h2>
+  <a href="PASTE_YOUR_TALLY_FORM_URL_HERE" class="cta-btn">Review a Contract Now £125</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">Rev<span>io</span></div>
+  <p>© 2025 Revio. Not a law firm. Always consult a qualified solicitor for legal advice.</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => observer.observe(r));
+
+  // Contact form submission
+  document.getElementById('contactForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formStatus = document.getElementById('formStatus');
+    const submitBtn = e.target.querySelector('.submit-btn');
+    const formData = new FormData(e.target);
+    
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    formStatus.style.display = 'none';
+    
+    const data = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      company: formData.get('company'),
+      message: formData.get('message')
+    };
+    
+    const subject = encodeURIComponent('Revio Contact Form Submission');
+    const body = encodeURIComponent(
+      `Name: ${data.name}\n` +
+      `Email: ${data.email}\n` +
+      `Company: ${data.company || 'Not provided'}\n\n` +
+      `Message:\n${data.message}`
+    );
+    
+    window.location.href = `mailto:info@reviocontracts.com?subject=${subject}&body=${body}`;
+    
+    formStatus.className = 'form-status success';
+    formStatus.textContent = 'Your default email client has opened. Please send the email to complete your inquiry.';
+    
+    setTimeout(() => {
+      e.target.reset();
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message';
+      formStatus.style.display = 'none';
+    }, 5000);
+  });
+</script>
+</body>
+</html>
