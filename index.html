@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Revio — AI-Powered Contract Review for Construction</title>
+<title>Revio — AI Powered Contract Review for Construction</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -824,22 +824,22 @@
     <div class="step">
       <div class="step-num">01</div>
       <h3>Upload Your Contract</h3>
-      <p>Share your contract in PDF or Word format. We handle everything from JCT and NEC to bespoke client-drafted agreements.</p>
+      <p>Share your contract in PDF or Word format. We handle everything from JCT and NEC to bespoke client drafted agreements.</p>
     </div>
     <div class="step">
       <div class="step-num">02</div>
+      <h3>Secure Payment</h3>
+      <p>Complete your payment securely through Stripe. Only £125 for a comprehensive analysis that could save you thousands.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
       <h3>AI Risk Analysis</h3>
       <p>Our AI identifies problematic clauses, scores your commercial risk, and benchmarks terms against standard industry practice.</p>
     </div>
     <div class="step">
-      <div class="step-num">03</div>
-      <h3>Detailed Excel Report</h3>
-      <p>You receive a comprehensive Excel report with risk register, executive summary, and actionable recommendations delivered in minutes.</p>
-    </div>
-    <div class="step">
       <div class="step-num">04</div>
-      <h3>Negotiate with Confidence</h3>
-      <p>Use your report to have informed conversations, propose amendments, or decide if the contract is worth signing at all.</p>
+      <h3>Receive Your Report</h3>
+      <p>Within 5 minutes, you receive a comprehensive Excel report with risk register, executive summary, and actionable recommendations.</p>
     </div>
   </div>
 </section>
@@ -863,7 +863,7 @@
       <div class="value-dot"></div>
       <div>
         <h3>On your side, always</h3>
-        <p>We review every contract from the perspective of the contractor or subcontractor — because that's who we exist to protect.</p>
+        <p>We review every contract from the perspective of the contractor or subcontractor because that's who we exist to protect.</p>
       </div>
     </div>
     <div class="value-item">
@@ -877,7 +877,7 @@
       <div class="value-dot"></div>
       <div>
         <h3>Priced for everyone</h3>
-        <p>Affordable, transparent pricing — because protecting yourself commercially shouldn't be a luxury only large firms can afford.</p>
+        <p>Affordable, transparent pricing because protecting yourself commercially shouldn't be a luxury only large firms can afford.</p>
       </div>
     </div>
   </div>
@@ -916,7 +916,7 @@
 <!-- CTA -->
 <section class="cta" id="pricing">
   <h2>Get your first contract reviewed today.</h2>
-  <a href="#" class="cta-btn">Review a Contract Now £125</a>
+  <a href="PASTE_YOUR_TALLY_FORM_URL_HERE" class="cta-btn">Review a Contract Now £125</a>
 </section>
 
 <!-- FOOTER -->
@@ -946,12 +946,10 @@
     const submitBtn = e.target.querySelector('.submit-btn');
     const formData = new FormData(e.target);
     
-    // Disable button and show loading
     submitBtn.disabled = true;
     submitBtn.textContent = 'Sending...';
     formStatus.style.display = 'none';
     
-    // Get form values
     const data = {
       name: formData.get('name'),
       email: formData.get('email'),
@@ -959,7 +957,6 @@
       message: formData.get('message')
     };
     
-    // Create mailto link as fallback (this will work immediately)
     const subject = encodeURIComponent('Revio Contact Form Submission');
     const body = encodeURIComponent(
       `Name: ${data.name}\n` +
@@ -968,14 +965,11 @@
       `Message:\n${data.message}`
     );
     
-    // For now, open default email client (temporary solution until you set up email service)
     window.location.href = `mailto:info@reviocontracts.com?subject=${subject}&body=${body}`;
     
-    // Show success message
     formStatus.className = 'form-status success';
     formStatus.textContent = 'Your default email client has opened. Please send the email to complete your inquiry.';
     
-    // Reset form
     setTimeout(() => {
       e.target.reset();
       submitBtn.disabled = false;
